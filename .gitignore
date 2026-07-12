@@ -42,3 +42,6 @@ next-env.d.ts
 
 # IDE
 .idea/
+
+# local AI mentor notes — not for GitHub
+.claude/
