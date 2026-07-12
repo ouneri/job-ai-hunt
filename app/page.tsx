@@ -18,13 +18,13 @@ export default function Home() {
     
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-neutral-200 dark:border-neutral-800 p-8 space-y-6">
+    <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl border-2 border-white/15 p-8 space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
-            Анализ вакансии
+          <h1 className="text-3xl font-black uppercase tracking-tight text-white">
+            Анализ <span className="text-lime-400">вакансии</span>
           </h1>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-white/50">
             Вставь текст вакансии — AI разберёт стек и требования
           </p>
         </div>
@@ -33,7 +33,7 @@ export default function Home() {
           placeholder="Введите текст вакансии"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="w-full min-h-40 resize-y rounded-xl border border-neutral-300 dark:border-neutral-700 bg-transparent p-4 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+          className="w-full min-h-40 resize-y border-2 border-white/20 bg-black p-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-lime-400 transition-colors"
         />
 
         <button
@@ -49,13 +49,15 @@ export default function Home() {
             setTextRes(data.text);
             setLoading(false)
           }}
-          className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+          className="border-2 border-lime-400 bg-lime-400 px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all hover:bg-black hover:text-lime-400 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Анализирую...": "Анализировать"}
+          <span className={loading ? "inline-block animate-[pulseAccent_1s_ease-in-out_infinite]" : ""}>
+            {loading ? "Анализирую..." : "Анализировать"}
+          </span>
         </button>
 
         {textRes && (
-          <div className="prose prose-neutral dark:prose-invert prose-sm max-w-none rounded-xl bg-neutral-50 dark:bg-neutral-800/60 p-5">
+          <div className="animate-[fadeInUp_0.4s_ease-out] border-2 border-white/15 p-5 prose prose-invert prose-sm max-w-none">
             <Markdown>{textRes}</Markdown>
           </div>
         )}
