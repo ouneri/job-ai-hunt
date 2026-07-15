@@ -1,6 +1,8 @@
 'use client';
-import {useState} from 'react';
+import {useState, useRef, useEffect} from 'react';
 import Markdown from 'react-markdown';
+import {useAiRequest} from './hooks/useAiRequest';
+
 
 
 
@@ -9,12 +11,14 @@ import Markdown from 'react-markdown';
 
 export default function Home() {
    const [text, setText] = useState('');
-   const [textRes, setTextRes] = useState('')
-   const [loading, setLoading] = useState(false);
+   const inputRef = useRef<HTMLTextAreaElement>(null);
+   const {result, loading, error, generate} = useAiRequest<{ text: string }>('/api/analyze');
 
 
+   useEffect(() => {
+    inputRef.current?.focus()
 
-
+   },[]);
     
 
   return (
@@ -32,6 +36,7 @@ export default function Home() {
         <textarea
           placeholder="Введите текст вакансии"
           value={text}
+          ref={inputRef}
           onChange={(e) => setText(e.target.value)}
           className="w-full min-h-40 resize-y border-2 border-white/20 bg-black p-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-lime-400 transition-colors"
         />
@@ -39,15 +44,7 @@ export default function Home() {
         <button
           disabled={loading}
           onClick={  async () => {
-            setLoading(true);
-            const res = await fetch('/api/analyze', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text }),
-            });
-            const data = await res.json();
-            setTextRes(data.text);
-            setLoading(false)
+              await generate({ text });
           }}
           className="border-2 border-lime-400 bg-lime-400 px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all hover:bg-black hover:text-lime-400 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -56,9 +53,15 @@ export default function Home() {
           </span>
         </button>
 
-        {textRes && (
+        {result && !error && (
           <div className="animate-[fadeInUp_0.4s_ease-out] border-2 border-white/15 p-5 prose prose-invert prose-sm max-w-none">
-            <Markdown>{textRes}</Markdown>
+            <Markdown>{result}</Markdown>
+          </div>
+        )}
+
+        {error && (
+          <div className="animate-[fadeInUp_0.4s_ease-out] border-2 border-white/15 p-5 prose prose-invert prose-sm max-w-none">
+            <p className="text-red-400">Ошибка при обработке запроса</p>
           </div>
         )}
       </div>

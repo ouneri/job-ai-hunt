@@ -45,3 +45,5 @@ next-env.d.ts
 
 # local AI mentor notes — not for GitHub
 .claude/
+
+/app/generated/prisma

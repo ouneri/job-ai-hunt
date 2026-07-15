@@ -1,12 +1,15 @@
 'use client'
 import { useState } from "react"
 import Markdown from "react-markdown"
+import { useAiRequest } from "../hooks/useAiRequest"
+
 
 
 export default function InterviewPage() {
 
     const [textInterview, setTextInterview] = useState('')
-    const [textAiRes, setTextAiRes] = useState('')
+    const {result, error, loading, generate} = useAiRequest<{ textInterview: string }>('/api/interview-prep')
+    
     
 
 
@@ -32,24 +35,28 @@ export default function InterviewPage() {
                 ></textarea>
 
                 <button
+                    disabled={loading}
                     onClick={async () => {
-                        const res = await fetch('/api/interview-prep', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ textInterview })
+                        await generate({ textInterview });
 
-                        })
-                        const data = await res.json();
-                        setTextAiRes(data.text)
+
                     }}
-                    className="border-2 border-lime-400 bg-lime-400 px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all hover:bg-black hover:text-lime-400 active:scale-95"
+                    className="  border-2 border-lime-400 bg-lime-400 px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition-all hover:bg-black hover:text-lime-400 active:scale-95"
                 >
-                    Подготовиться
+                    {loading ? "Генерация..." : "Подготовиться к собеседованию"}
                 </button>
 
-                {textAiRes && (
+
+                {result && !error && (
+                    
                     <div className="animate-[fadeInUp_0.4s_ease-out] border-2 border-white/15 p-5 prose prose-invert prose-sm max-w-none">
-                        <Markdown>{textAiRes}</Markdown>
+                        <Markdown>{result}</Markdown>
+                    </div>
+                )}
+
+                {error && (
+                    <div className="animate-[fadeInUp_0.4s_ease-out] border-2 border-white/15 p-5 prose prose-invert prose-sm max-w-none">
+                        <p className="text-red-400">Ошибка при обработке запроса</p>
                     </div>
                 )}
             </div>
