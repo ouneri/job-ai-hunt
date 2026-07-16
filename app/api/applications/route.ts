@@ -13,6 +13,21 @@ export async function GET() {
   }
 }
 
+export async function PATCH(request: Request) {
+  try {
+    const data = await request.json();
+    const application = await prisma.application.update({
+      where: { id: data.id },
+      data: { status: data.status },
+    });
+
+    return Response.json(application, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return Response.json({error: 'Ошибка с изменением статуса'}, {status: 500})
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();

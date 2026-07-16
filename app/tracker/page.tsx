@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 
 export default function TrackerPage() {
-  const [bid, setBid] = useState<{ id: number; name: string; title: string }[]>(
-    [],
-  );
+  const [bid, setBid] = useState<
+    { id: number; name: string; title: string; status: string }[]
+  >([]);
   const [nameCompany, setNameCompany] = useState("");
   const [post, setPost] = useState("");
 
@@ -80,6 +80,41 @@ export default function TrackerPage() {
                 {data.name}
               </span>
               <span className="text-white/60">{data.title}</span>
+
+              <select
+                value={data.status}
+                onChange={async (e) => {
+                  try {
+                    const response = await fetch("/api/applications", {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        id: data.id,
+                        status: e.target.value,
+                      }),
+                    });
+                    fetchData();
+                    return console.log("Статус заявки успешно изменен");
+                  } catch (error) {
+                    console.log(error);
+                    console.log("Ошибка при изменении статуса  заявки");
+                  }
+                }}
+                className="border-2 border-white/20 bg-black px-3 py-2 text-xs font-bold uppercase tracking-wide text-lime-400 focus:outline-none focus:border-lime-400 transition-colors cursor-pointer"
+              >
+                <option value="APPLIED" className="bg-black text-white">
+                  Принят
+                </option>
+                <option value="INTERVIEW" className="bg-black text-white">
+                  На рассмотрении
+                </option>
+                <option value="OFFER" className="bg-black text-white">
+                  Оффер
+                </option>
+                <option value="REJECTED" className="bg-black text-white">
+                  Отклонено
+                </option>
+              </select>
             </div>
           ))}
         </div>
