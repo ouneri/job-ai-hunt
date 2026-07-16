@@ -81,6 +81,26 @@ export default function TrackerPage() {
               </span>
               <span className="text-white/60">{data.title}</span>
 
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch("/api/applications", {
+                      method: "DELETE",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ id: data.id }),
+                    });
+                    fetchData()
+                    return console.log("Заявка успешно удалена");
+                  } catch (err) {
+                    console.log(err);
+                    return console.log("Неудалось удалить заявку ");
+                  }
+                }}
+                className="border-2 border-red-500/40 px-3 py-2 text-xs font-bold uppercase tracking-wide text-red-500 hover:bg-red-500 hover:text-black transition-colors"
+              >
+                Удалить
+              </button>
+
               <select
                 value={data.status}
                 onChange={async (e) => {

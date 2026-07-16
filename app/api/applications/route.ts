@@ -28,6 +28,20 @@ export async function PATCH(request: Request) {
   }
 }
 
+export async function DELETE (request: Request) {
+  try {
+    const data = await request.json();
+    const application = await prisma.application.delete({
+      where: { id: data.id},
+    });
+    return Response.json(application, {status: 200})
+  } catch (error) {
+    console.log(error);
+    return Response.json({error: 'Ошибка удаления заявки', status: 500})
+  }
+  
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
