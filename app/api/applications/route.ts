@@ -37,7 +37,7 @@ export async function DELETE (request: Request) {
     return Response.json(application, {status: 200})
   } catch (error) {
     console.log(error);
-    return Response.json({error: 'Ошибка удаления заявки', status: 500})
+    return Response.json({error: 'Ошибка с изменением статуса'}, {status: 500})
   }
   
 }
