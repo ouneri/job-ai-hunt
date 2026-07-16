@@ -48,6 +48,12 @@ export default function RootLayout({
           >
             Подготовка к собеседованию
           </Link>
+          <Link
+            href="/tracker"
+            className="text-sm font-bold uppercase tracking-wide text-white/60 hover:text-lime-400 transition-colors"
+          >
+            Трекер заявок
+          </Link>
         </nav>
         {children}</body>
     </html>
