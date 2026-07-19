@@ -9,13 +9,22 @@ export function useAiRequest<T>(endpoint: string) {
     try {
       setLoading(true);
       setError(false);
+      setResult("");
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      setResult(data.text);
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const {value, done } = await reader.read();
+        if(done) break;
+        setResult((prev) => prev + decoder.decode(value))
+      }
+
     } catch (error) {
       setError(true);
       console.log(error);
