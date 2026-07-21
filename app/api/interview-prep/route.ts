@@ -7,6 +7,11 @@ const geminiAI = new GoogleGenAI({
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    if (!data.textInterview)
+      return Response.json(
+        { text: " Вы ввепли пустое поле " },
+        { status: 400 },
+      );
     const res = await geminiAI.models.generateContentStream({
       model: "gemini-2.5-flash",
       contents: `Ты - профессиональный HR и тех-лид в компании, твоя задача проанализировать сегодняшний рынок и на основе предоставленных тебе данных

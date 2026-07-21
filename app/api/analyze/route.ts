@@ -7,6 +7,8 @@ const geminiAI = new GoogleGenAI({
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    if (!data.text)
+      return Response.json({ text: "Вы ввели пустое поле" }, { status: 400 });
     const result = await geminiAI.models.generateContentStream({
       model: "gemini-2.5-flash",
       contents: `Ты — помощник для соискателей в IT. Ниже текст вакансии.
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
         controller.close();
       },
     });
-    return new Response(stream)
+    return new Response(stream);
   } catch (error) {
     console.log(error);
     return Response.json(
