@@ -4,9 +4,38 @@ const geminiAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+const requestLog = new Map<string, { count: number; resetAt: number }>();
+const LIMIT = 5;
+const WINDOW_MS = 60_000;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = requestLog.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    requestLog.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return false;
+  }
+
+  if (entry.count >= LIMIT) {
+    return true;
+  }
+
+  entry.count++;
+  return false;
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+
+    if (isRateLimited(ip)) {
+      return Response.json(
+        { text: "Слишком много запросов, попробуй позже" },
+        { status: 429 },
+      );
+    }
     if (!data.text)
       return Response.json({ text: "Вы ввели пустое поле" }, { status: 400 });
     const result = await geminiAI.models.generateContentStream({
