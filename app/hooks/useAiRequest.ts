@@ -1,15 +1,38 @@
-import { useState } from "react";
+import { useReducer } from "react";
 
 export function useAiRequest<T>(endpoint: string) {
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [state, dispatch] = useReducer(requestReducer, {
+    status: "idle",
+    result: "",
+  });
+
+  type Action =
+    | { type: "start" }
+    | { type: "chunk"; payload: string }
+    | { type: "done" }
+    | { type: "error" };
+
+  type State = {
+    status: "idle" | "loading" | "success" | "error";
+    result: string;
+  };
+
+  function requestReducer(state: State, action: Action): State {
+    switch (action.type) {
+      case "start":
+        return { status: "loading", result: "" };
+      case "chunk":
+        return { status: "loading", result: state.result + action.payload };
+      case "done":
+        return { status: "success", result: state.result };
+      case "error":
+        return { status: "error", result: "Ошибка запроса" };
+    }
+  }
 
   async function generate(payload: T) {
     try {
-      setLoading(true);
-      setError(false);
-      setResult("");
+      dispatch({ type: "start" });
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -20,19 +43,21 @@ export function useAiRequest<T>(endpoint: string) {
       const decoder = new TextDecoder();
 
       while (true) {
-        const {value, done } = await reader.read();
-        if(done) break;
-        setResult((prev) => prev + decoder.decode(value))
+        const { value, done } = await reader.read();
+        if (done) break;
+        dispatch({ type: "chunk", payload: decoder.decode(value) });
       }
-
+      dispatch({ type: "done" });
     } catch (error) {
-      setError(true);
       console.log(error);
-      setResult("Ошибка при обработке запроса");
-    } finally {
-      setLoading(false);
+      dispatch({ type: "error" });
     }
   }
 
-  return { result, loading, error, generate };
+  return {
+    result: state.result,
+    loading: state.status === "loading",
+    error: state.status === "error",
+    generate,
+  };
 }
