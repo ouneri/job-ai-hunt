@@ -15,7 +15,7 @@ const AnalyzeSchema = z.object({
   text: z.string(),
 });
 
-function isRateLimited(ip: string): boolean {
+export function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = requestLog.get(ip);
 
@@ -82,3 +82,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

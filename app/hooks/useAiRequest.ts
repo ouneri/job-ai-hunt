@@ -1,34 +1,34 @@
 import { useReducer } from "react";
 
+type Action =
+  | { type: "start" }
+  | { type: "chunk"; payload: string }
+  | { type: "done" }
+  | { type: "error" };
+
+type State = {
+  status: "idle" | "loading" | "success" | "error";
+  result: string;
+};
+
+export function requestReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "start":
+      return { status: "loading", result: "" };
+    case "chunk":
+      return { status: "loading", result: state.result + action.payload };
+    case "done":
+      return { status: "success", result: state.result };
+    case "error":
+      return { status: "error", result: "Ошибка запроса" };
+  }
+}
+
 export function useAiRequest<T>(endpoint: string) {
   const [state, dispatch] = useReducer(requestReducer, {
     status: "idle",
     result: "",
   });
-
-  type Action =
-    | { type: "start" }
-    | { type: "chunk"; payload: string }
-    | { type: "done" }
-    | { type: "error" };
-
-  type State = {
-    status: "idle" | "loading" | "success" | "error";
-    result: string;
-  };
-
-  function requestReducer(state: State, action: Action): State {
-    switch (action.type) {
-      case "start":
-        return { status: "loading", result: "" };
-      case "chunk":
-        return { status: "loading", result: state.result + action.payload };
-      case "done":
-        return { status: "success", result: state.result };
-      case "error":
-        return { status: "error", result: "Ошибка запроса" };
-    }
-  }
 
   async function generate(payload: T) {
     try {
