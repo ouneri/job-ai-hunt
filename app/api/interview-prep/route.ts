@@ -1,4 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
+import * as z from "zod"
+
 
 const geminiAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -6,6 +8,12 @@ const geminiAI = new GoogleGenAI({
 const LIMIT = 5;
 const WINDOW_MS = 60000;
 const requestLog = new Map<string, { count: number; resetAt: number }>();
+
+
+
+const interviewSchema = z.object({
+  textInterview: z.string(),
+})
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -26,7 +34,14 @@ function isRateLimited(ip: string): boolean {
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const parsed = interviewSchema.safeParse(await request.json());
+
+    if (!parsed.success) {
+      return Response.json({ text: "Вы ввели пустое поле" }, { status: 400 });
+    }
+
+    const data = parsed.data
+
     const ip = request.headers.get("x-forwarded-for") ?? "unknown";
     if (isRateLimited(ip)) {
       return Response.json(

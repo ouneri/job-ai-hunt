@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import * as z from "zod";
 
 const geminiAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -7,6 +8,12 @@ const geminiAI = new GoogleGenAI({
 const requestLog = new Map<string, { count: number; resetAt: number }>();
 const LIMIT = 5;
 const WINDOW_MS = 60_000;
+
+// zod
+
+const AnalyzeSchema = z.object({
+  text: z.string(),
+});
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -24,10 +31,15 @@ function isRateLimited(ip: string): boolean {
   entry.count++;
   return false;
 }
-
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const parsed = AnalyzeSchema.safeParse(await request.json());
+
+    if (!parsed.success) {
+      return Response.json({ text: "Вы ввели пустое поле" }, { status: 400 });
+    }
+
+    const data = parsed.data;
     const ip = request.headers.get("x-forwarded-for") ?? "unknown";
 
     if (isRateLimited(ip)) {
@@ -36,8 +48,7 @@ export async function POST(request: Request) {
         { status: 429 },
       );
     }
-    if (!data.text)
-      return Response.json({ text: "Вы ввели пустое поле" }, { status: 400 });
+
     const result = await geminiAI.models.generateContentStream({
       model: "gemini-2.5-flash",
       contents: `Ты — помощник для соискателей в IT. Ниже текст вакансии.
