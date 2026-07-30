@@ -1,6 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 
+export async function fetchData() {
+  const response = await fetch("/api/applications");
+  return response.json();
+}
+
 export default function TrackerPage() {
   const [bid, setBid] = useState<
     { id: number; name: string; title: string; status: string }[]
@@ -8,14 +13,8 @@ export default function TrackerPage() {
   const [nameCompany, setNameCompany] = useState("");
   const [post, setPost] = useState("");
 
-  async function fetchData() {
-    const response = await fetch("/api/applications");
-    const data = await response.json();
-    setBid(data);
-  }
-
   useEffect(() => {
-    fetchData();
+    fetchData().then(setBid);
   }, []);
 
   return (
@@ -54,7 +53,7 @@ export default function TrackerPage() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ name: nameCompany, title: post }),
                 });
-                fetchData();
+                fetchData().then(setBid);
                 console.log("Заявка успешно добавлена");
               } catch (error) {
                 console.log(error);
@@ -89,7 +88,7 @@ export default function TrackerPage() {
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ id: data.id }),
                     });
-                    fetchData()
+                    fetchData().then(setBid);
                     return console.log("Заявка успешно удалена");
                   } catch (err) {
                     console.log(err);
@@ -113,7 +112,7 @@ export default function TrackerPage() {
                         status: e.target.value,
                       }),
                     });
-                    fetchData();
+                    fetchData().then(setBid);
                     return console.log("Статус заявки успешно изменен");
                   } catch (error) {
                     console.log(error);
